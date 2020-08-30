@@ -4,4 +4,4 @@ bundle install
 bundle exec jekyll build
 docker stop blog
 docker rm blog
-docker run -d -p 80:80 --name blog -v $(pwd)/_site:/usr/share/nginx/html nginx
+docker run -d -p 80:80 --restart=always --name blog -v $(pwd)/_site:/usr/share/nginx/html nginx
