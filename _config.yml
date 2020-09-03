@@ -71,7 +71,7 @@ netease_comment: false
 # ba_track_id: [your track id]
 
 # Google Analytics
-ga_track_id: 'UA-49627206-1'            # Format: UA-xxxxxx-xx
+ga_track_id: 'UA-175007631-1'            # Format: UA-xxxxxx-xx
 ga_domain: baymax.cool
 
 
