@@ -1,7 +1,7 @@
 ---
 layout:     post
 title:      "我和搜索的那点事儿"
-subtitle:   "从最早手撸了一个搜索引擎，到被ES虐的醉生梦死"
+subtitle:   "最早手撸了一个搜索引擎，如今被ES虐的醉生梦死"
 date:       2020-05-14 12:00:00
 author:     "Baymax"
 header-img: "img/post-bg-agt-1.jpg"
