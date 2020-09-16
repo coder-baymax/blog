@@ -1,7 +1,7 @@
 ---
 layout:     post
 title:      "Leectode Magic - DeepCopy"
-subtitle:   "算法笔记：深度拷贝类型时的小魔法"
+subtitle:   "算法笔记：深度拷贝对象的新思路"
 date:       2020-06-18 12:00:00
 author:     "Baymax"
 header-img: "img/post-bg-agt-6.jpg"
