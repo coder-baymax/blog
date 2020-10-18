@@ -42,7 +42,7 @@ class Solution:
         string = '$#{}#^'.format('#'.join(x for x in s))
         longest, mx, dp = 0, 0, [1] * len(string)
         for i in range(1, len(string) - 1):
-            dp[i] = min(dp[2 * mx - i], mx + dp[mx] - i) if i < mx else 1
+            dp[i] = min(dp[2 * mx - i], mx + dp[mx] - i) if mx + dp[mx] > i else 1
             while string[i - dp[i]] == string[i + dp[i]]:
                 dp[i] += 1
             if i + dp[i] > mx + dp[mx]:
@@ -90,7 +90,7 @@ class Solution:
         string = '$#{}#^'.format('#'.join(x for x in s))
         total, mx, dp = 0, 0, [1] * len(string)
         for i in range(1, len(string) - 1):
-            dp[i] = min(dp[2 * mx - i], mx + dp[mx] - i) if i < mx else 1
+            dp[i] = min(dp[2 * mx - i], mx + dp[mx] - i) if mx + dp[mx] > i else 1
             while string[i - dp[i]] == string[i + dp[i]]:
                 dp[i] += 1
             if i + dp[i] > mx + dp[mx]:
