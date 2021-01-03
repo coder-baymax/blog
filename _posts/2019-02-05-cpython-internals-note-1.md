@@ -11,10 +11,10 @@ tags:
     - Study Notes
 ---
 
-> Cpython虚拟机学习笔记系列
-> 油管视频：[CPython internals: A ten-hour codewalk](https://pg.ucsd.edu/cpython-internals.htm)
-> github博客：[zpoint/CPython-Internals](https://github.com/zpoint/CPython-Internals)
-> github源码：[python/cpython](https://github.com/python/cpython)
+> Cpython虚拟机学习笔记系列  
+> 油管视频：[CPython internals: A ten-hour codewalk](https://pg.ucsd.edu/cpython-internals.htm)  
+> github博客：[zpoint/CPython-Internals](https://github.com/zpoint/CPython-Internals)  
+> github源码：[python/cpython](https://github.com/python/cpython)  
 
 ## 图灵机
 
