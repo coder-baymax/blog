@@ -39,7 +39,7 @@ tags:
 
 ### 实现图灵机
 
-目前我们在做一些ToB的产品，用于金融行业的数据处理和计算等工作，其实用户的各种需求都可以被解释成“可计算问题”，产品的本质也是创造一种工具去解决用户的“可计算问题”，不过目前这个产品还不是图灵完备的，因为会图灵完备会大大提升用户的使用成本。
+目前我的公司主要在做一些ToB的产品，用于金融行业的数据处理和计算等工作，其实用户的各种需求都可以被解释成“可计算问题”，产品的本质也是创造一种工具去解决用户的“可计算问题”，不过目前这个产品还不是图灵完备的，因为会图灵完备会大大提升用户的使用成本。
 
 上面的知识和思考让我第一次站到了一个语言设计者的视角来观察语言和框架的问题。首先，一种通用编程语言是需要图灵完备的，否则一定会有一些数据结构和算法无法实现，从而不能解决所有的问题。其次，实现图灵机最简单的方法其实是模仿图灵机原本的设计，站在巨人的肩膀上总是没错的，这也从另一个侧面解释了为什么操作系统（C语言运行环境）、JVM和Python虚拟机都有堆、栈等概念，并且是相似的。
 
@@ -49,7 +49,7 @@ tags:
 
 ### 运行add.py代码
 
-下面我们写一段非常简单的python代码：
+下面我写了一段非常简单的python代码作为demo：
 
 ```python
 x = 1
@@ -58,13 +58,13 @@ z = x + y
 print z
 ```
 
-直接使用python运行这段代码，我们可以在屏幕上直接得到结果3，但是执行python的过程其实是一块黑盒：
+直接使用python运行这段代码，可以在屏幕上直接得到结果3，但是执行python的过程其实是一块黑盒：
 
 ![](/img/in-post/2019-02-05-cpython-internals-note-1/magic.jpg)
 
 使用过java和python的同学应该会知道，这两个语言都有自己的虚拟机环境，并且是会有编译的过程的，其中java会形成很多class文件，而python会形成pyc文件。
 
-因此我们从顶层的视角来看，可以把整个运行流程进行拆分，变成两个步骤：
+因此从顶层的视角来看，可以把整个运行流程进行拆分，变成两个步骤：
 
 1. 通过编译器将py文件编译成虚拟机的可执行文件
 2. 将编译好的bytecode传入虚拟机执行，得到输出结果
@@ -90,19 +90,19 @@ with open('add.py', 'r') as f:
     print [ord(x) for x in c.co_code]
 ```
 
-上面这段代码我们将add.py中所有的代码进行了编译，并且转化成ascii码打印到屏幕上，结果是一串数字，我们很难从中看到什么内容：
+上面这段代码将add.py中所有的代码进行了编译，并且转化成ascii码打印到屏幕上，结果是一串数字，很难从中看到什么内容：
 
 ```python
 [100, 0, 0, 90, 0, 0, 100, 1, 0, 90, 1, 0, 101, 0, 0, 101, 1, 0, 23, 90, 2, 0, 101, 2, 0, 71, 72, 100, 2, 0, 83]
 ```
 
-不过python本身提供了更人性化的bytecode查看工具：[dis](https://docs.python.org/2.7/library/dis.html)，我们执行：
+不过python本身提供了更人性化的bytecode查看工具：[dis](https://docs.python.org/2.7/library/dis.html)，执行代码：
 
 ```bash
 ./python -m dis add.py
 ```
 
-可以得到python帮我们格式化好的bytecode：
+可以得到python已经帮忙格式化好的bytecode：
 
 ```bash
   1           0 LOAD_CONST               0 (1)
@@ -149,17 +149,17 @@ with open('add.py', 'r') as f:
 #define LOAD_NAME 101 /* Index in name list */
 ```
 
-结合opcode的定义我们不难看出，这些和前面打印的ascii码数组是可以一一对应的，每一个opcode都占用了一个字符的位置，另外还填充了参数信息。
+结合opcode的定义不难看出，这些和前面打印的ascii码数组是可以一一对应的，每一个opcode都占用了一个字符的位置，另外还填充了参数信息。
 
 ### 巨大的无限循环
 
-在ceval.c源代码的964行，我们可以看到一个巨大的for loop：
+在ceval.c源代码的964行，可以看到一个巨大的for loop：
 
 ```cpp
 964    for (;;) {...}
 ```
 
-在1112行，我们可以看到一个巨大的switch：
+在1112行，可以看到一个巨大的switch：
 
 ```cpp
 1112        switch (opcode) {...}
@@ -169,7 +169,7 @@ with open('add.py', 'r') as f:
 
 ### LOAD_CONST
 
-按照图灵机的定义，光有无限的纸带和控制规则是不够的，我们还需要有一个状态寄存器。源代码中的LOAD_CONST就正好涉及到了这部分内容：
+按照图灵机的定义，光有无限的纸带和控制规则是不够的，还需要有一个状态寄存器。源代码中的LOAD_CONST就正好涉及到了这部分内容：
 
 ```cpp
 case LOAD_CONST:
@@ -205,11 +205,11 @@ co = f->f_code;
 consts = co->co_consts;
 ```
 
-首先是f这个参数，它保存了当前运行的方法帧信息，是一个PyFrameObject对象；然后是co参数，它保存了代码信息，是一个PyCodeObject对象。consts是一个PyObject对象，保存了代码信息里面的常量信息，后面的章节我们会深入了解PyObject，这个Python中最重要的对象类型。
+首先是f这个参数，它保存了当前运行的方法帧信息，是一个PyFrameObject对象；然后是co参数，它保存了代码信息，是一个PyCodeObject对象。consts是一个PyObject对象，保存了代码信息里面的常量信息，后面的章节会深入了解PyObject，这个Python中最重要的对象类型。
 
 #### oparg变量
 
-这个变量看名字就猜不到含义了，但是我们可以看它的定义和赋值：
+这个变量看名字就猜不到含义了，但是可以直接看它的定义和赋值：
 
 ```cpp
 register int oparg;         /* Current opcode argument, if any */
@@ -253,7 +253,7 @@ register PyObject **stack_pointer;  /* Next free slot in value stack */
                           assert(STACK_LEVEL() <= co->co_stacksize); }
 ```
 
-从这里我们可以看到stack_pointer对应了一个栈指针，这个栈里面保存的都是PyObject类型的对象。另外这里定义了有两个PUSH函数，其中BASIC_PUSH只将一个对象压栈，而PUSH函数在压栈的同时，还执行了栈大小的检查，防止栈溢出。
+从这里可以看到stack_pointer对应了一个栈指针，这个栈里面保存的都是PyObject类型的对象。另外这里定义了有两个PUSH函数，其中BASIC_PUSH只将一个对象压栈，而PUSH函数在压栈的同时，还执行了栈大小的检查，防止栈溢出。
 
 ### STORE_NAME
 
@@ -278,11 +278,11 @@ case STORE_NAME:
     break;
 ```
 
-这一段代码相对更复杂一些，但是我们也可以用上面类似的方法直接找到源码来阅读，下面着重介绍几个比较重要的变量和方法。
+这一段代码相对更复杂一些，但是也可以用上面类似的方法直接找到源码来阅读，下面着重介绍几个比较重要的变量和方法。
 
 #### names变量
 
-从名字可以大致猜测是保存变量名称的对象，我们直接看定义：
+从名字可以大致猜测是保存变量名称的对象，下面直接看定义：
 
 ```cpp
 PyObject *names;
@@ -325,9 +325,9 @@ PyAPI_FUNC(int) PyDict_SetItem(PyObject *mp, PyObject *key, PyObject *item);
 
 这两个方法都是关于引用计数的，了解过python垃圾回收的话应该知道python就使用了引用计数的垃圾回收机制。它们都在object.h中被定义，这部分内容涉及垃圾回收的原理，这里就不多赘述了，后面有机会再仔细研究。
 
-### 再看bytecode
+### 小结
 
-我们根据上面一部分源码的阅读，再来看add.py的bytecode，整体逻辑就会变得清晰：
+根据上面一部分源码的阅读，再来看add.py的bytecode，整体逻辑就会变得清晰：
 
 1. 载入1和2两个常量，压入value_stack
 2. 分别存入x和y，每次都从value_stack中出栈
