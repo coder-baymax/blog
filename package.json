@@ -23,6 +23,7 @@
         "push": "git push origin master --tag"
     },
     "dependencies": {
+        "bundle": "^2.1.0",
         "doctoc": "^1.4.0"
     }
 }

@@ -1,6 +1,6 @@
 ---
 layout:     post
-title:      "global标识符与方法调用 - Cpython Internals Notes (2)"
+title:      "变量作用域与方法调用 - Cpython Internals Notes (2)"
 subtitle:   "Cpython虚拟机学习笔记系列"
 date:       2019-3-15 12:00:00
 author:     "Baymax"

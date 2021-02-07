@@ -1,6 +1,6 @@
 ---
 layout:     post
-title:      "从图灵机到Cpython - Cpython Internals Notes (1)"
+title:      "从图灵机到Cpython的虚拟机设计 - Cpython Internals Notes (1)"
 subtitle:   "Cpython虚拟机学习笔记系列"
 date:       2019-2-05 12:00:00
 author:     "Baymax"
