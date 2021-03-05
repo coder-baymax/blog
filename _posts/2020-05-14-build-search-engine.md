@@ -1,6 +1,6 @@
 ---
 layout:     post
-title:      "我和搜索的那点事儿"
+title:      "倒排索引和ES坑"
 subtitle:   "最早手撸了一个搜索引擎，如今被ES虐的醉生梦死"
 date:       2020-05-14 12:00:00
 author:     "Baymax"
