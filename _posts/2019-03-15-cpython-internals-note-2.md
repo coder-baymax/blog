@@ -107,7 +107,7 @@ print foo(x)
 
 上面的bytecode会比较难以理解，不过还有一些可视化工具帮助研究：[Python Tutor](http://pythontutor.com/visualize.html#mode=edit)。把代码复制黏贴进去之后，可以看到每一步运行时，python虚拟机的状态。
 
-![](/img/in-post/2019-03-15-cpython-internals-note-2/tutor.gif)
+![](../img/in-post/2019-03-15-cpython-internals-note-2/tutor.gif)
 
 从上面的动图可以看到，整段代码经历了三个方法的调用，每次方法调用会将一个frame（方法帧）压入调用栈：
 

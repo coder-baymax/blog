@@ -58,7 +58,7 @@ tags:
 
 #### 资源编排服务（orchestrators）
 
-![](/img/in-post/2020-12-31-architecting-distributed-cloud-applications/orchestrators.jpg)
+![](../img/in-post/2020-12-31-architecting-distributed-cloud-applications/orchestrators.jpg)
 
 **资源编排服务**：用于统筹管理一个计算机集群的组件或者框架。这里的计算机可以是物理机，也可以是虚拟机，资源编排服务通常会完成以下工作：
 
@@ -71,7 +71,7 @@ tags:
 
 #### 地域（regions）和可用区（availability zones）
 
-![](/img/in-post/2020-12-31-architecting-distributed-cloud-applications/regions.jpg)
+![](../img/in-post/2020-12-31-architecting-distributed-cloud-applications/regions.jpg)
 
 由于全球化服务的需求，往往在不同的地方建立不同的区域级数据中心，因此地域是一个地点概念。可用区指的是在同一个地域内，会再独立架设电力、网络等设备，保障可用区之间相互独立，这样就不会形成地域单点故障。另外在同一个地域的可用区，一般会使用光纤高速网络连接，这样就保证了在一个地域内的服务响应速度。
 
@@ -85,7 +85,7 @@ tags:
 
 #### 微服务示例
 
-![](/img/in-post/2020-12-31-architecting-distributed-cloud-applications/microservices-1.jpg)
+![](../img/in-post/2020-12-31-architecting-distributed-cloud-applications/microservices-1.jpg)
 
 微服务架构与以往的大型复杂软件架构不同，它一般由许多相互协作的小型服务构成。上图就是微服务架构的一个示例，图中由三个服务构成：web服务、库存服务和订单服务，由于不同服务的吞吐量要求不同，它们启动的虚拟机实例数量也不同。
 
@@ -93,7 +93,7 @@ tags:
 
 #### 迁移到微服务的好处
 
-![](/img/in-post/2020-12-31-architecting-distributed-cloud-applications/microservices-2.jpg)
+![](../img/in-post/2020-12-31-architecting-distributed-cloud-applications/microservices-2.jpg)
 
 在服务建立初期，一般都使用一个巨大的服务来实现所有的功能，那么在什么时候应该考虑迁移到微服务架构呢？通常，微服务相对于传统软件架构会有**四个优势**，在考虑架构迁移的时候可以对照是不是当前软件架构遇到的瓶颈：
 
@@ -110,13 +110,13 @@ tags:
 
 #### SLA服务可用性的计算
 
-![](/img/in-post/2020-12-31-architecting-distributed-cloud-applications/microservices-3.jpg)
+![](../img/in-post/2020-12-31-architecting-distributed-cloud-applications/microservices-3.jpg)
 
 在改造成微服务之后，对应SLA是有不利影响的，参照上面的表格，分别假设每个服务的SLA都是 $99.99\%$ 和 $99.999\%$ ，那么多个服务相互依赖的情况下，整体的SLA就会下降，最后的结果是：如果有n个有依赖关系的服务，那么最终的SLA分别是 $99.99^n\%$ 和 $99.999^n\%$ 。
 
 #### 自动扩缩容
 
-![](/img/in-post/2020-12-31-architecting-distributed-cloud-applications/microservices-4.jpg)
+![](../img/in-post/2020-12-31-architecting-distributed-cloud-applications/microservices-4.jpg)
 
 **自动扩缩容**：根据服务的负载不同，自动增加/减少虚拟机实例的数量，自动扩缩容一般会使用以下几种方法：
 
@@ -128,7 +128,7 @@ tags:
 
 引用自网站：[The Twelve Factors](https://12factor.net/)，这12条标准是构建微服务的一个参考标准，在这里不会深入每一条标准讲述，而只是介绍这12条标准内容和思想，为构建微服务作为参考：
 
-![](/img/in-post/2020-12-31-architecting-distributed-cloud-applications/microservices-5.jpg)
+![](../img/in-post/2020-12-31-architecting-distributed-cloud-applications/microservices-5.jpg)
 
 第一条：使用统一的代码仓库，但是不同的服务之间不分享代码。  
 第二条：每一个服务在部署时会自动带上自己依赖的类库，也就是说单个服务不应该依赖外部包，这保障了服务的独立性，会对开发、测试和部署都带来很多好处。  
@@ -136,7 +136,7 @@ tags:
 第四条：在处理另一个服务无响应的异常时，要使用容错方案，不能让当前服务轻易崩溃。  
 第五条：严格区分build、release和run的流程，这条标准对三者做出了不同的定义：build——将代码和依赖一起打包并确定版本；release——将打好的包和环境变量绑定，形成镜像；run——把镜像放到执行环境中运行。  
 
-![](/img/in-post/2020-12-31-architecting-distributed-cloud-applications/microservices-6.jpg)
+![](../img/in-post/2020-12-31-architecting-distributed-cloud-applications/microservices-6.jpg)
 
 第六条：微服务由一个或多个无状态的进程组成，它们之间也不应该共享数据，这一条是为了保障服务可以被随时停掉或者启动，而不会产生副作用。  
 第七条：应该监听端口号，而不是特定的host地址，这样便于数据编排服务进行网络资源管理。  
@@ -154,7 +154,7 @@ tags:
 
 #### 镜像和容器
 
-![](/img/in-post/2020-12-31-architecting-distributed-cloud-applications/containers-1.jpg)
+![](../img/in-post/2020-12-31-architecting-distributed-cloud-applications/containers-1.jpg)
 
 **镜像**：一个镜像包含了某个版本的服务以及它所有的依赖类库，它本身是一个只读对象。
 **容器**：独立运行镜像的环境，即可以装载和运行镜像并保障容器之间是相互隔离的。
@@ -163,7 +163,7 @@ tags:
 
 #### 隔离级别的选择
 
-![](/img/in-post/2020-12-31-architecting-distributed-cloud-applications/containers-2.jpg)
+![](../img/in-post/2020-12-31-architecting-distributed-cloud-applications/containers-2.jpg)
 
 上面的图片将隔离级别分为三种：硬件级别、操作系统级别和资源级别。其中隔离级别最高的是物理机，不同物理机之间所有的东西都不共享，最低的是进程级别，它共享了所有内容，容器属于资源级别的隔离。
 
@@ -171,7 +171,7 @@ tags:
 
 #### 容器启动的流程
 
-![](/img/in-post/2020-12-31-architecting-distributed-cloud-applications/containers-3.jpg)
+![](../img/in-post/2020-12-31-architecting-distributed-cloud-applications/containers-3.jpg)
 
 这里使用了Docker作为资源编排服务的例子，整个启动一个容器的过程分为几个步骤：
 
@@ -183,7 +183,7 @@ tags:
 
 #### 持续集成、持续交付、持续部署
 
-![](/img/in-post/2020-12-31-architecting-distributed-cloud-applications/containers-4.jpg)
+![](../img/in-post/2020-12-31-architecting-distributed-cloud-applications/containers-4.jpg)
 
 现代的开发流程中，经常会遇到持续集成、持续交付和持续部署这几个词，这一整套流程大概是这样：
 
@@ -233,7 +233,7 @@ tags:
 
 #### 正向代理和反向代理
 
-![](/img/in-post/2020-12-31-architecting-distributed-cloud-applications/networking-3.jpg)
+![](../img/in-post/2020-12-31-architecting-distributed-cloud-applications/networking-3.jpg)
 
 **正向代理（Forward Proxies）**
 
@@ -254,7 +254,7 @@ tags:
 
 #### 集群内DNS服务
 
-![](/img/in-post/2020-12-31-architecting-distributed-cloud-applications/networking-4.jpg)
+![](../img/in-post/2020-12-31-architecting-distributed-cloud-applications/networking-4.jpg)
 
 上图是一个使用了集群内DNS服务的例子，一个客户端请求进入集群，首先来到了负载均衡，负载均衡转交到了一台web服务器上，然后需要调用库存服务，但是由于资源编排服务的存在，库存服务的入口随时可能发生变化，因此引入集群内DNS服务，它的本质是一张映射表，把一个服务名称和它对应的地址映射在一起。有了DNS之后，就可以找到库存服务的反向代理地址了，然后请求就会由这个反向代理，转发到某一个具体的库存服务实例上，由这个实例处理这一次请求的内容。
 
@@ -266,7 +266,7 @@ tags:
 
 #### 服务状态探针
 
-![](/img/in-post/2020-12-31-architecting-distributed-cloud-applications/networking-5.jpg)
+![](../img/in-post/2020-12-31-architecting-distributed-cloud-applications/networking-5.jpg)
 
 如上图所示，对于某些反向代理来说，每个实例的状态是很重要的。比如负载均衡：为了避免请求打到压力过大甚至宕机的实例上，负载均衡必须知道每一个实例的状态，从而更好地转发请求。通常方案是每个实例都暴露一个专门用于检查服务健康状态的接口，由负载均衡定时检查这些接口的状态：
 
@@ -277,7 +277,7 @@ tags:
 
 #### 从本地函数迁移到远程函数
 
-![](/img/in-post/2020-12-31-architecting-distributed-cloud-applications/networking-6.jpg)
+![](../img/in-post/2020-12-31-architecting-distributed-cloud-applications/networking-6.jpg)
 
 在把一个大型复杂软件转化成众多微服务的过程中，需要把很多进程本地方法调用转化成远程函数调用，即通过网络调用另一个微服务的函数，在这过程中，许多事情都会发生变化：
 
@@ -287,7 +287,7 @@ tags:
 
 #### API版本控制
 
-![](/img/in-post/2020-12-31-architecting-distributed-cloud-applications/networking-7.jpg)
+![](../img/in-post/2020-12-31-architecting-distributed-cloud-applications/networking-7.jpg)
 
 本质上来说，微服务是没有API升级的说法的，因为一旦API已经暴露给其他服务，任何的升级都必须保持向前兼容，比较推荐的做法是在调用的时候指明需要调用的API版本号。
 
@@ -334,7 +334,7 @@ tags:
 - 修改，不管如何修改，最后一次的修改会被记录
 - 删除，如果对应元素已经被删除，那么不做任何修改
 
-![](/img/in-post/2020-12-31-architecting-distributed-cloud-applications/networking-10.jpg)
+![](../img/in-post/2020-12-31-architecting-distributed-cloud-applications/networking-10.jpg)
 
 问题在于新增数据的时候，容易出现多次请求导致新增多条数据的情况，因此引入**幂等设计模式**，一般包含三个步骤：
 
@@ -366,7 +366,7 @@ tags:
 
 #### 消息队列的使用
 
-![](/img/in-post/2020-12-31-architecting-distributed-cloud-applications/messaging-2.jpg)
+![](../img/in-post/2020-12-31-architecting-distributed-cloud-applications/messaging-2.jpg)
 
 上图是一个使用了消息队列的分布式服务案例，可以通过这个案例来了解消息队列的应用方式，从客户端发起一个web请求开始：
 
@@ -386,7 +386,7 @@ tags:
 
 #### 高容错的消息处理
 
-![](/img/in-post/2020-12-31-architecting-distributed-cloud-applications/messaging-3.jpg)
+![](../img/in-post/2020-12-31-architecting-distributed-cloud-applications/messaging-3.jpg)
 
 可以发现，在之前对于消息模式的介绍中，都要求每个微服务本身对消息可以进行高容错的处理，这里给出了一种高容错的消息处理方案：
 
@@ -576,7 +576,7 @@ Paxos本质是一种分布式一致性协议，而不是领导选举方式，这
 
 由于Paxos的实现非常复杂，现在许多系统都会使用Raft算法来进行领导选举，Raft算法内部由一个状态机实现，每个节点都可能是三种状态之一：
 
-![](/img/in-post/2020-12-31-architecting-distributed-cloud-applications/leader-1.jpg)
+![](../img/in-post/2020-12-31-architecting-distributed-cloud-applications/leader-1.jpg)
 
 - Follower状态，初始状态，并且当一段时间没有收到Leader的心跳包，那么切换到Candidate状态
 - Candidate状态，选举过程中收到半数以上投票，那么进入Leader状态；收到新Leader的心跳或者新term则进入Follower状态
@@ -615,7 +615,7 @@ Raft算法相比Paxos提供了更明确的分工，并且算法也更好理解�
 
 #### 冷热数据
 
-![](/img/in-post/2020-12-31-architecting-distributed-cloud-applications/data-1.jpg)
+![](../img/in-post/2020-12-31-architecting-distributed-cloud-applications/data-1.jpg)
 
 并不是所有的数据都拥有一样的重要性和热度，因此提出了冷热数据的概念，不同数据的对比如上图，举例来说：缓存就是一种最热的数据，它速度极快，丢失对数据安全没有任何影响；而用户大量的行为、点击、日志数据则可以作为冷数据保存。
 
@@ -623,7 +623,7 @@ Raft算法相比Paxos提供了更明确的分工，并且算法也更好理解�
 
 #### 用缓存来加速
 
-![](/img/in-post/2020-12-31-architecting-distributed-cloud-applications/data-2.jpg)
+![](../img/in-post/2020-12-31-architecting-distributed-cloud-applications/data-2.jpg)
 
 上图是一个请求的执行图，图中每一个箭头都是一个请求，为了加快无状态服务到数据库的请求，一般会在无状态服务上加入一个缓存，在一段时间内缓存部分数据库中的数据，这个行为的本质就是改变了原有数据库的热度，从而让它的访问更快。
 
@@ -648,7 +648,7 @@ CDN也是一种大多数云服务提供商都会提供的服务，主要用于�
 
 在未来几年甚至十几年里，这两种数据库都会同时存在，另外在一个服务中也是可以根据不同数据的需求部署不同的数据库的，下图展示了在微服务中使用两种数据库的不同架构：
 
-![](/img/in-post/2020-12-31-architecting-distributed-cloud-applications/data-3.jpg)
+![](../img/in-post/2020-12-31-architecting-distributed-cloud-applications/data-3.jpg)
 
 如图，左侧是一个关系型数据库，所有的服务实例都访问同一个关系型数据库节点，在数据库中可以执行关联、排序、分组、统计等等操作，如果要扩容数据库，通常情况下也是选择升级更大更好的硬件，以满足更大的流量需求。
 
@@ -663,7 +663,7 @@ CDN也是一种大多数云服务提供商都会提供的服务，主要用于�
 
 另外，在最初设计数据库和数据库结构的时候，就必须要考虑到以后的业务量级发展，尤其是数据模型，如果发现数据模型不能满足业务需求的时候，就必须对现有数据进行迁移。数据迁移可能导致业务下线，甚至不得不停机更新，对于不能停机的业务还需要执行在线数据迁移，这会使得数据迁移的复杂度大大增加。
 
-![](/img/in-post/2020-12-31-architecting-distributed-cloud-applications/data-5.jpg)
+![](../img/in-post/2020-12-31-architecting-distributed-cloud-applications/data-5.jpg)
 
 在分布式环境中，报错和宕机是非常常见的，因此在处理数据问题时，需要考虑加入副本。例如，假设有三个副本正在运行，那么其中一个宕机时，剩下两个就可以进行领导选举，由其中一个对外提供服务。当然错误也可能是人为故意触发的，比如需要对服务进行升级或者缩容的时候，人为造成一个副本停机。
 
@@ -696,7 +696,7 @@ CAP是数据库三个维度的衡量标准，包含了：Consistency（一致性
 
 反过来如果同时要求可用性和一致性，就必须要求两个分片能够同步数据，这样就失去了分区容错性，即一定要保障这两个分片是联通的。
 
-![](/img/in-post/2020-12-31-architecting-distributed-cloud-applications/data-6.jpg)
+![](../img/in-post/2020-12-31-architecting-distributed-cloud-applications/data-6.jpg)
 
 由于CAP理论，必须在一致性、可用性和分区容错性三者之间做出平衡和选择，使用之前描述数据库副本时的案例来说明，假如某个副本掉线导致数据无法同步，那么此时有两种选择：
 
@@ -722,7 +722,7 @@ CAP是数据库三个维度的衡量标准，包含了：Consistency（一致性
 
 #### CQRS模式
 
-![](/img/in-post/2020-12-31-architecting-distributed-cloud-applications/data-7.jpg)
+![](../img/in-post/2020-12-31-architecting-distributed-cloud-applications/data-7.jpg)
 
 通常数据库的写入可能涉及许多验证、检查和其他逻辑，而读取会涉及大量的分组、聚合、统计等需求，为了应对这种场景，提出了CQRS模式。CQRS是一种基于命令的数据库设计模式，它将读库和写库操作分开，分为两个服务：
 
@@ -733,7 +733,7 @@ CAP是数据库三个维度的衡量标准，包含了：Consistency（一致性
 
 #### 事件溯源（Event Sourcing）
 
-![](/img/in-post/2020-12-31-architecting-distributed-cloud-applications/data-8.jpg)
+![](../img/in-post/2020-12-31-architecting-distributed-cloud-applications/data-8.jpg)
 
 事件溯源常常会和CQRS模式一同使用，事件溯源是基于事件的设计模式，事件是整个系统中的一等公民也是该模式的基础，这个模式有几个基本要点：
 
@@ -747,7 +747,7 @@ CAP是数据库三个维度的衡量标准，包含了：Consistency（一致性
 
 #### SAGA模式
 
-![](/img/in-post/2020-12-31-architecting-distributed-cloud-applications/data-10.jpg)
+![](../img/in-post/2020-12-31-architecting-distributed-cloud-applications/data-10.jpg)
 
 SAGA模式是一种用于实现分布式事务的方式，假设一个分布式事务由N个子事务组成，其中每个事务都有一个补偿事务，用于抵消它们本身所产生的影响，可以按照一定的顺序执行这N个子事务，当有事务失败时，可以有两种解决方式：
 
@@ -794,7 +794,7 @@ SAGA模式是一种用于实现分布式事务的方式，假设一个分布式�
 
 **Active-Passive模式**
 
-![](/img/in-post/2020-12-31-architecting-distributed-cloud-applications/data-11.jpg)
+![](../img/in-post/2020-12-31-architecting-distributed-cloud-applications/data-11.jpg)
 
 主动-被动模式由一个集群负责处理所有的流量，在处理完流量之后将数据库的结果定时同步到另一个集群，当主集群发生意外整体下线时，可以由管理员手动将所有的流量切换到另一个集群。由于这两个集群使用同样的服务代码，并且数据也会定时同步，因此理论上切换之后整个服务就可以立刻恢复。
 
@@ -802,7 +802,7 @@ SAGA模式是一种用于实现分布式事务的方式，假设一个分布式�
 
 **Active-Active模式**
 
-![](/img/in-post/2020-12-31-architecting-distributed-cloud-applications/data-12.jpg)
+![](../img/in-post/2020-12-31-architecting-distributed-cloud-applications/data-12.jpg)
 
 主动-主动模式下，所有的集群都会处理客户端发来的请求，并且周期性的把自己的数据同步到其他的集群中，这样有任何一个集群发生意外而下线时，它的流量就会自动切换到其他集群上，从而避免服务的中断。相比较主动-被动的模式而言，这种方案对集群的要求更小，减少了额外集群的开销，如果部署在不同的地域，还可以减少客户端的延迟，并且由于每个集群都处于使用状态，它们的可用性也可以得到保障。
 

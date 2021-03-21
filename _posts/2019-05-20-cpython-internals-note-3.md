@@ -123,7 +123,7 @@ c = Counter(5, 7)
 
 首先，和之前一样使用[Python Tutor](http://www.pythontutor.com/visualize.html#mode=display)进行可视化分析：
 
-![](/img/in-post/2019-05-20-cpython-internals-note-3/tutor.gif)
+![](../img/in-post/2019-05-20-cpython-internals-note-3/tutor.gif)
 
 在第一步定义了Counter这个类之后，全局变量中新增了一个同名变量，并且包含了定义在类中的三个方法。由于这个可视化工具是代码层级的，并没有深入类创建的细节，可以在后面的源码分析中看到这部分。
 

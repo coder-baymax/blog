@@ -60,7 +60,7 @@ print z
 
 直接使用python运行这段代码，可以在屏幕上直接得到结果3，但是执行python的过程其实是一块黑盒：
 
-![](/img/in-post/2019-02-05-cpython-internals-note-1/magic.jpg)
+![](../img/in-post/2019-02-05-cpython-internals-note-1/magic.jpg)
 
 使用过java和python的同学应该会知道，这两个语言都有自己的虚拟机环境，并且是会有编译的过程的，其中java会形成很多class文件，而python会形成pyc文件。
 
@@ -69,7 +69,7 @@ print z
 1. 通过编译器将py文件编译成虚拟机的可执行文件
 2. 将编译好的bytecode传入虚拟机执行，得到输出结果
 
-![](/img/in-post/2019-02-05-cpython-internals-note-1/magic-2.jpg)
+![](../img/in-post/2019-02-05-cpython-internals-note-1/magic-2.jpg)
 
 对于编译器这部分原理不是这次讨论的主要内容，如果对这部分有兴趣可以找编译原理相关的学习资料，Cpython相关的学习主要针对虚拟机的部分。
 

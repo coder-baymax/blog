@@ -22,7 +22,7 @@ tags:
 5. 然后是流程中的核心步骤，系统根据报价单在每个商品上选择不同的供应商，自动生成采购单
 6. 再由采购们查看修改和确认，并交由物流系统执行采购入库流程
 
-![](/img/in-post/2018-04-21-purchase-cost-optimization/purchase-workflow-1.jpg)
+![](../img/in-post/2018-04-21-purchase-cost-optimization/purchase-workflow-1.jpg)
 
 ### 核心过程
 
@@ -56,7 +56,7 @@ tags:
 
 物流成本需要纳入采购成本分析，这个功能其实很早就提出，但是一直没有执行。一是因为采购系统本身还有许多功能要做，另外一个是物流那边还没有提供详细的报价逻辑，他们也在做各个物流公司之间的报价整合。在没有和物流的同事交流之前，我们以为在发货地不变的情况下，物流成本函数是这样的：
 
-![](/img/in-post/2018-04-21-purchase-cost-optimization/price-func-1.jpg)
+![](../img/in-post/2018-04-21-purchase-cost-optimization/price-func-1.jpg)
 
 但是物流成本的问题，远比我们想象的复杂很多。在物流组计算的时候，他们需要综合考虑到货周期、货物重量和类型等各种问题，最后才能给出报价。
 
@@ -83,7 +83,7 @@ tags:
 
 调研了这么多，最后的总结下来的物流成本曲线大概是下面这样：
 
-![](/img/in-post/2018-04-21-purchase-cost-optimization/price-func-2.jpg)
+![](../img/in-post/2018-04-21-purchase-cost-optimization/price-func-2.jpg)
 
 也就是说，我们大概知道在同一个地方买的越多，那么物流成本是更低的。但是这里也受到很多其他因素的影响，因此这个函数是阶梯式的，另外里面有太多复杂的逻辑，我们不能将物流成本计算纳入采购系统，只能使用物流部门提供的报价接口。
 
@@ -134,7 +134,7 @@ tags:
 
 在新的流程里面，我们在生成采购单的时候，加入了物流成本的影响，其他流程不变。
 
-![](/img/in-post/2018-04-21-purchase-cost-optimization/purchase-workflow-2.jpg)
+![](../img/in-post/2018-04-21-purchase-cost-optimization/purchase-workflow-2.jpg)
 
 ### 成本节约
 
