@@ -203,6 +203,24 @@ Python的语言体系相比Java而言，知识点更琐碎，给我最深印象�
 
 ## 语言特性
 
+### 可变与不可变对象
+
+Python中的基础容器有四种：dict、set、list、tuple，其中只有tuple是不可变对象，因此也只有它可以作为dict的Key，另外基础类型：int、str、float等都是不可变对象，这听起来似乎有点奇怪，比如：
+
+```python
+i = 10
+i += 1
+```
+
+看起来变量i从10变成了11，但是实际上并不是这样，在Python语言中所有的代码都会转化成字节码，再交给Python虚拟机运行，如果使用Python自带的dis命令就可以知道，常量在虚拟机里是先载入到系统中，再赋值给变量的，而数字之类的内容都属于常量的一部分，它们也会参与引用计数和垃圾回收，通过下面的例子可以方便理解：
+
+```python
+x = 1
+y = 1
+id(x)  --- 9784864 (这个id在不同的虚拟机中会不同)
+id(y)  --- 9784864 (和x的结果一样，它们指向同一个常量)
+```
+
 ### 元类（Metaclass）
 
 简单来说，元类就是类的类，类定义了一个对象应该有哪些统一的属性和表达，元类则定义了类应该有哪些统一的属性和表达。除了这个所说的定义以外，Python中的元类还有以下特别之处：
@@ -1045,7 +1063,117 @@ TODO
 
 # Spark
 
-TODO
+Spark和MapReduce一样，也是一种分布式计算框架，它对MapReduce的几点问题做出了改进：Spark现在支持更复杂的DAG图任务，并且可以有效利用内存，并不是所有的数据都要走硬盘IO，在运行效率上要比MapReduce快得多。
+
+## RDD
+
+[RDD（Resilient Distributed Datasets）](https://zh.wikipedia.org/wiki/Spark_RDD)弹性分布式数据集是Spark对于数据最基本的抽象，它是一种不可变的数据集合，每一个RDD都是从数据源或者从另一个RDD通过转换操作而来。在Spark2.0中，对RDD进行了更高层的封装，形成了DataFrame和DataSet两个API。
+
+一个RDD由一个或者多个分区（Partitions）组成，对于RDD来说，每个分区会被一个计算任务所处理，用户可以在创建RDD时指定其分区个数，如果没有指定，则默认采用程序所分配到的CPU的核心数。
+
+### 创建、操作与缓存
+
+**创建**
+
+创建RDD一般通过读取外部数据源实现，也可以直接通过内存中的数据来创建。在实际业务中，一般都会从类S3这样的对象存储中进行读取，最后的结果保存到各类数据库中。
+
+**操作**
+
+Spark将RDD的基本操作定义为两种类别，分别是：
+
+- Transformations，从现有数据集中执行转化函数创建新的数据集
+- Actions，在数据集上运行函数并获取返回结果
+
+在Spark中，Transformations本身不会被主动执行，只有在对应的Actions执行时，才会执行，这和MapReduce有很大的区别，这种惰性计算更类似于函数式编程中的惰性求值。另外，RDD内部也会保存相互之间的依赖关系，当部分数据丢失后，可以利用这种依赖关系重新计算丢失部分的数据，而不需要对RDD内所有的分区进行重新计算。
+
+**缓存**
+
+Spark非常快的一个关键原因在于它有缓存功能，缓存之后如果后面的操作还用到了该数据集，那么就可以直接从缓存中获取，而不需要再从头进行计算。一般来说缓存分为：内存、硬盘和JVM缓存，可以根据不同的需要进行缓存设置，在Sprak可以使用persist和cache函数来对数据集进行缓存，其中cache就等价于persist(StorageLevel.MEMORY_ONLY)。
+
+### 理解Shuffle
+
+在MapReduce中，Shuffle的步骤是Hadoop框架将Map函数的输出整体进行排序，从而可以交给Reduce函数执行的过程。在这一过程有两个缺陷：一是要求Map函数的输出是可排序的，第二对于某些操作并不需要排序，全排序的策略会影响性能。
+
+![](../img/in-post/2021-03-01-mind-map-of-backend-knowledge/spark-1.png)
+
+因此在Spark中的Shuffle步骤有所不同，在Spark中通常不会进行跨分区操作，但是遇到reduceByKey等转换时，就必须从所有的分区读取数据并查找所有键对应的值，然后汇总在一起以计算每个键的最终结果，这就是Spark中的Shuffle。在Spark的版本变迁中，Shuffle也经历了多个版本的迭代，不过如果不使用排序的方式进行Shuffle的话，会用到HashMap进行去重，这样的问题是很容易导致OOM，因此最后还是选择了[优化之后的Sort Shuffle](https://zhuanlan.zhihu.com/p/67061627)。
+
+但是不管在哪Shuffle的操作影响都很大，因为它涉及到大量的磁盘IO和网络IO操作，因此使用时要非常注意，以下操作可能导致Shuffle：
+
+- 涉及到重新分区操作：如repartition和coalesce
+- 涉及到ByKey的操作：如groupByKey和reduceByKey，但countByKey除外
+- 涉及到Join的操作：如cogroup和join。
+
+**宽依赖和窄依赖**
+
+窄依赖指的是父RDD的每个分区只被一个子RDD分区引用，此时子RDD分区只对应常数个父RDD分区；宽依赖指的是每个父RDD分区都可能被多个子RDD分区引用，子RDD分区通常会对应所有的父RDD分区。在窄依赖的情况下进行RDD的变换操作时，是不需要进行Shuffle的，比如对于两个根据同样Key进行分区的父RDD进行join操作，也不会导致Shuffle，同样的还有map、filter等操作。
+
+窄依赖在数据重算时，还有更多的优势：由于它只依赖部分父RDD，因此只需要重新计算一部分父RDD的结果即可，而宽依赖通常需要重算所有的父RDD，因此窄依赖在重算时会有更高的效率。
+
+### PageRank案例
+
+[PageRank](https://zh.wikipedia.org/zh-hk/PageRank)是一个用于计算网页权重的算法，它根据网页的应用关系进行迭代计算，最终将网页的权重趋于稳定值，在这其中需要使用一个For循环进行迭代，迭代中使用join操作变换RDD，其中的核心代码可能长这样：
+
+```scala
+for (i <- 1 to iters) {
+  val contribs = links.join(ranks).values.flatMap {
+    case (urls, rank) =>
+      val size = urls.size
+      urls.map(url => (url, rank / size))
+  }
+  ranks = contribs.reduceByKey(_ + _).mapValues(0.15 + 0.85 * _)
+}
+```
+
+这个案例中的关键在于对计算的优化，包含了按照一定的迭代数量进行缓存和对数据倾斜的优化，具体可以参考博客：[从PageRank谈Spark应用程序调优](http://sharkdtu.com/posts/spark-app-optimize.html)。
+
+### 数据倾斜
+
+数据倾斜几乎是在做Spark数据处理时一定会遇到的，而解决方案往往要根据实际使用的算子和处理的数据来决定，笔者之前遇到的情况基本都是在GroupBy的时候，因为数据不平衡导致的（比如和地域有关的，绝大部分数据都是北京上海的）。一开始使用增大并行度的方案，最后改成了两段式聚合，取得了比较好的效果，进阶版的可以看美团的博客：[美团 - Spark性能优化指南](https://tech.meituan.com/2016/05/12/spark-tuning-pro.html)。
+
+## 内核解析
+
+### 核心组件
+
+在看核心组件之前，可以先来看看提交一个Spark任务有哪些主要的配置项：
+
+> driver-cores —— driver使用内核数，默认为1
+> driver-memory —— driver内存大小，默认512M
+> executor-cores —— 每个executor使用的内核数，默认为1，官方建议2-5个
+> num-executors —— 启动executors的数量，默认为2
+> executor-memory —— executor内存大小，默认1G
+
+![](../img/in-post/2021-03-01-mind-map-of-backend-knowledge/spark-2.png)
+
+可以看到配置的参数中最主要涉及两个模块：
+
+**Driver**：运行程序的main方法，创建SparkContext对象，另外还负责：将用户程序转化成Job、在Executor之间调度任务、跟踪Executor的执行情况等。
+
+**Executor**：每个Executor都是一个JVM进程，负责在Spark中执行具体的任务，并向Driver汇报任务进度，由于它们都运行在不同的JVM进程中，它们之间是相互独立的也不能直接共享数据。
+
+### 任务运行的基本流程
+
+Spark有好几种不同的[集群运行模式](https://spark.apache.org/docs/latest/cluster-overview.html)，它们都建立在不同的底层之上，比如：Standalone（Spark自己提供的调度方案）、YARN集群、Mesos集群和Kubernetes集群，不过在不同的集群上，许多模块和概念的含义是相同的：
+
+- Application：用户提交的Spark程序，在集群中由Driver和数个Executor构成
+- Cluster Manager：集群的资源管理器，在不同的集群中不同，比如：在YARN中就是ResourceManager
+- Worker Node：在集群中运行Application代码的节点
+- Job：在对RDD进行Actions操作时触发，Job之间按照顺序执行
+- Stage：根据RDD的关系将Job切分成Stage，各个Stage之间按照顺序执行
+- Task：Spark中的执行单元，在RDD执行计算时，每个分区都会有一个对应的Task
+- DAGScheduler：根据Job构建DAG，并提交Task给TaskScheduler
+- TaskScheduler：保存Task并将其分配给Excutor运行
+
+在不同的集群上由于架构不同，运行的方式会有一些区别，但是大体都包含这几个步骤：
+
+1. 代码提交到Driver，生成SparkContext，并交给资源管理器分配资源
+2. 资源管理器指定Worker Node启动Executor进程，每个Executor发送心跳给Driver
+3. 资源分配完毕后SparkContex结束初始化，然后执行代码，遇到Actions算子时触发Job
+4. Driver将Job传递给DAGScheduler，生成DAG并划分Stage，再根据并行度生成Task，分发给Executor
+5. Executor接收到Task之后，会执行Task中的代码，作用在RDD分区上
+6. 当所有的Task都执行完毕之后，整个Application执行完成，SparkContext生命周期结束
+
+在不同平台上的运行流程可以参考博客：[掘金 - Spark内核解析](https://juejin.cn/post/6844904047011430407)。
 
 # Flink
 
