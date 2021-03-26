@@ -976,13 +976,15 @@ FST是一种相对复杂的数据结构，它可以看作是一个字典树的�
 
 ## 分布式架构
 
+### 高可用：集群、节点和分片
 
+分片（Shard）是ES分布式中最基础也是最重要的概念，在ES中的index在物理机上就表示为多个分片的集合，这些分片相互独立并且每个都拥有自己的索引。另外，每个分片都可以设置副本（replica）来满足高可用的需求，因此分片又可以分为两类：主分片和副本分片。每个index的主分片数量必须在index创建的时候就设置好，但是分片副本数量是随时可以修改的。
 
-### 主分片和副本分片
+一个集群会由多个工作节点构成，ES会自己管理每个分片在集群中保存在哪些节点上，用户并不需要关心，当集群进行扩缩容的时候，分片会在节点上自动进行流转，具体可以参考官方文档：[ES - Clusters, nodes, and shards](https://www.elastic.co/guide/en/elasticsearch/reference/7.12/scalability.html)。
 
-### 主节点和数据节点
+#### 主节点和领导选举
 
-### 高可用与故障转移
+#### 脑裂问题
 
 # MongoDB
 
@@ -1021,6 +1023,10 @@ FST是一种相对复杂的数据结构，它可以看作是一个字典树的�
 #### Mongos
 
 #### Config Server
+
+# Kubernates
+
+TODO
 
 # Hadoop
 
@@ -1258,9 +1264,5 @@ Spark有好几种不同的[集群运行模式](https://spark.apache.org/docs/lat
 TODO
 
 # Kafka
-
-TODO
-
-# Kubernates
 
 TODO
