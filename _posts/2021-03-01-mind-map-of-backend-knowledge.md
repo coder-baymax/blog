@@ -749,7 +749,7 @@ Mysql的binlog是一种[二进制日志](https://dev.mysql.com/doc/refman/8.0/en
 
 #### MMM
 
-MMM（Master-Master replication manager for MySQL）架构使用了多个主服务器，由mmm-manager管理整个集群，每个节点都由一个mmm-agent服务向mmm-manager发送心跳包，当其中一个主库发生故障时，立刻切换到备份的主库进行写操作。但是这种方式也有诸多问题，比如：mmm-manager本身是个单点故障，mmm-agent也是个单点，如果挂掉会导致误判等等。
+MMM（Master-Master replication manager for MySQL）架构使用了多个主服务器，由mmm-manager管理整个集群，每个节点都由一个mmm-agent服务向mmm-manager发送心跳包，当其中一个主库发生故障时，立刻切换到备份的主库进行写操作。但是这种方式也有诸多问题，比如：mmm-manager本身是个单点故障，mmm-agent在每个节点上也是单点，如果挂掉会导致系统误判等等。
 
 美团对MMM这种架构进行了改进，具体可以参考：[美团 - 数据库高可用架构的演进与设想](https://tech.meituan.com/2017/06/29/database-availability-architecture.html)。
 
@@ -934,7 +934,7 @@ PS：主从和哨兵是**不能保证数据不丢失**的，它们的组合只�
 
 ![](../img/in-post/2021-03-01-mind-map-of-backend-knowledge/redis-2.png)
 
-另外，一致性哈希经常用在这样的场景下：需要将带有编号的客户端每次都放到同一个服务器上执行，并且还需要支持扩缩容操作。至于为什么Redis没有采用一致性哈希的方案，我找了半天并没有什么收获，我看到有人提了个[issue](https://github.com/redis/redis/issues/7451)，下面最新的回答是因为槽分配实现起来简单啊，咋说呢，听着也挺合理的。
+另外，一致性哈希经常用在这样的场景下：需要将带有编号的客户端每次都放到同一个服务器上执行，并且还需要支持扩缩容操作。至于为什么Redis没有采用一致性哈希的方案，笔者找了半天并没有什么收获，后来看到有人提了个[issue](https://github.com/redis/redis/issues/7451)，下面最新的回答是因为槽分配实现起来简单啊，咋说呢，听着也挺合理的。
 
 # ElasticSearch
 
@@ -946,9 +946,9 @@ PS：主从和哨兵是**不能保证数据不丢失**的，它们的组合只�
 - **类型（type）**：可以类比Mysql中的表，用于对文档进行定义
 - **文档（document）**：可以类比Mysql中的每一列数据
 
-其实每次看到这种解释都会有一种比较奇怪的感觉，原因在于ES毕竟是一种NoSql数据库，这种类比并不恰当，另外在之前的使用中也不会有人在一个index里面放多种不同的数据，那简直会变成一场噩梦，因此在ES的新版本中，彻底将type这种抽象移除了（官方文档传送门：[ES - Removal of mapping types](https://www.elastic.co/guide/en/elasticsearch/reference/current/removal-of-types.html)）。同时官方推荐了两种替代方案：一个是为每一种类型创建一个index，另一种是在index中新增一个type字段，用来标识到底是哪种类型的文档。
+其实每次看到这种解释都会有一种比较奇怪的感觉，原因在于ES毕竟是一种NoSql数据库，这种类比并不恰当，另外在之前的使用中也不会有人在一个index里面放多种不同的数据，那简直会变成一场噩梦，尤其再多种类型还有同名字段但类型不同的情况下，因此在ES的新版本中，彻底将type这种抽象移除了（官方文档传送门：[ES - Removal of mapping types](https://www.elastic.co/guide/en/elasticsearch/reference/current/removal-of-types.html)）。同时官方推荐了两种替代方案：一个是为每一种类型创建一个index，另一种是在index中新增一个type字段，用来标识到底是哪种类型的文档。
 
-### 关联关系
+### 保存关联属性
 
 既然是NoSql数据库，就不得不提处理一对多和多对多关系，这在Redis中是完全没有考虑的，但是在ES里很早就被纳入了设计中，在ES里面有三种基础的方式可以用于处理数据之间的关联关系：
 
@@ -957,6 +957,15 @@ PS：主从和哨兵是**不能保证数据不丢失**的，它们的组合只�
 - [父子文档](https://www.elastic.co/guide/en/elasticsearch/reference/current/parent-join.html)，有多对多关系的时候可能就需要使用到父子文档，这种方式比内嵌文档更彻底，就完全是分开的文档，通过关联关系连接在一起，当然也有更严重的性能损失，官方推荐只有在可以节约大量存储的时候使用这种模式
 
 当然除了官方推荐的三种方式以外，还可以自己用一些反模式的骚操作，比如增加冗余之类的，不过不变的是要在查询效率和存储空间之间进行权衡。
+
+### 结果分页
+
+有很多类似表格和列表的内容，前端都需要进行页码统计和翻页操作，还可能会额外支持直接跳转到X页的操作。对于Mysql来说可以使用count和limit命令来实现这两个操作，在ES中对应的是from和size命令，不过在ES中这个命令很容易遇到报错的情况，默认ES最大支持的分页深度是10000，这个值可以通过配置增大，但是增大也会导致查询效率大大下降（其实这在Mysql中也一样）。
+
+原因在于假如要返回第9900条到10000条之间的数据，那么数据库就必须将前面的内容都拿到，否则的话无法精确统计到第9900条到10000条，这个问题在分布式的ES上会更严重，为了精确找到9900条到10000条之间的数据，必须让每个shard都返回至少10000条数据再重新排序。因此分页的话不建议采用这种方案，可以采用以下方案：
+
+- search_after，只能处理下一页这种需求，必须提供上一页最后一个项目的具体字段，并且这个组合字段不能重复，否则可能会漏掉一些结果
+- scroll，这种方案会让ES提供一个结果的快照，避免分页的时候多次进行查询，但是快照也就意味着不适用于高实时性的场景
 
 ## 索引
 
@@ -975,6 +984,16 @@ PS：主从和哨兵是**不能保证数据不丢失**的，它们的组合只�
 FST是一种相对复杂的数据结构，它可以看作是一个字典树的变种，了解字典树的话可以知道，在英文环境下这种数据结构就是一棵26叉树，每个节点存放一个字符，下面的节点存放下一个字符，这样就可以共享非常多的节点，但是相应的查找时间也增加了。FST则在字典树的基础之上，对每个路径增加了权重，使得结果可以进行排序，如果说字典树对应Dict的话，FST就对应OrderedDict，详细内容可以参考博客：[申艳超 - 关于Lucene的词典FST深入剖析](https://www.shenyanchao.cn/blog/2018/12/04/lucene-fst/)。
 
 ## 分布式架构
+
+### 备份工具
+
+ES官方提供了一种基于快照的[备份工具](https://www.elastic.co/guide/en/elasticsearch/reference/7.12/backup-cluster-data.html)，这种方式类似于Docker的镜像仓库，需要提前创建一个快照仓库，然后就可以向仓库推送快照，仓库可以建立在本地也可以建立在远程，并且快照是增量更新的，不用担心备份多了的容量问题。
+
+不过官方没有提供类似Mysql的binlog和Redis的AOF工具，进行一次快照时，最终快照保存的内容会是基于开始时间到结束时间中间的某个状态，所以也不是稳定的，相比较其他数据库来说，ES的备份工具还是有待加强，可能也是考虑到很少有用ES作为主数据库的。
+
+#### Translog选项
+
+在之前有说过，由于数据并不是实时存储到磁盘中的，因此ES引入了Translog防止意外断电导致的数据丢失问题。这种方式比较类似Mysql的binlog和Redis的AOF，不过笔者暂时没有搜到利用这种文件进行恢复的相关文章，官方文档：[ES - Translog](https://www.elastic.co/guide/en/elasticsearch/reference/current/index-modules-translog.html)。与Mysql分布式方案相似的是，在ES的集群中各个分片与副本进行同步的时候，也是通过复制Translog并重放Translog中所有的操作来进行的。
 
 ### 高可用：集群、节点和分片
 
@@ -1007,7 +1026,7 @@ shard = hash(routing) % number_of_primary_shards
 
 #### 近实时搜索
 
-向一个ES集群写入一条数据并不是实时的，这是由ES的底层Lucene库决定的，它并不是传统意义上的数据库，而是一个搜索引擎。不过ES对Lucene做了诸多优化，在官方的介绍中，把它称为近实时搜索：[ES - Near Real Time Search](https://www.elastic.co/guide/en/elasticsearch/reference/7.12/near-real-time.html)。写入数据会先写入到文件缓存中，ES会有一个周期任务定时刷新缓存（默认周期是1秒），但即使刷新缓存也不是立刻写入硬盘，因此断电有可能导致ES损失分钟级别的数据，ES通过Translog（类似Mysql的binlog）来防止这种情况。
+向一个ES集群写入一条数据并不是实时的，这是由底层框架Lucene决定的，它并不是传统意义上的数据库，而是一个搜索引擎。不过ES对Lucene做了诸多优化，在官方的介绍中，把它称为近实时搜索：[ES - Near Real Time Search](https://www.elastic.co/guide/en/elasticsearch/reference/7.12/near-real-time.html)。写入数据会先写入到文件缓存中，ES会有一个周期任务定时刷新缓存（默认周期是1秒），但即使刷新缓存也不是立刻写入硬盘，因此断电有可能导致ES损失分钟级别的数据，ES通过Translog（类似Mysql的binlog）来防止这种情况。
 
 ### 领导选举
 
@@ -1045,11 +1064,42 @@ ES集群在Bully算法上做出了一点改进，从而避免了这两种问题�
 
 # MongoDB
 
-## 特性
+## 基础概念
 
-### 原子操作
+### 数据库、集合与文档
 
-### 备份与恢复
+这三个内容看起来非常眼熟，和ES中的索引、类型和文档结构几乎如出一辙，这也是因为它们都属于**基于文档**的Nosql数据库，它们存储的最低层抽象都是以文档为单位的，之上再建立其他的抽象，同时也都对应了Mysql中的库、表和行。除了基于文档的数据库以外，常见的还有：
+
+- **基于Key-Value**的数据库，代表为Redis，存储结构以哈希为主
+- **基于列**的数据库，代表为Hbase，有别于传统的行式存储（Mysql），列式存储将每一列的数据存储在一起
+- **基于图**的数据库，目前笔者还没有用到，对图结构会有额外的优化
+
+还有其他的存储方式，具体可以参考：[Wiki - NoSQL](https://zh.wikipedia.org/wiki/NoSQL#%E5%88%97%E5%AD%98%E5%82%A8)，不过这些存储方式本质上和是不是SQL数据库没有直接联系，只不过目前这些存储方式在NoSql数据库中更常见。
+
+#### 原子操作
+
+在MongoDB中是没有事务支持的，因此不能要求它保证ACID，但是关于单个文档的操作，本质上都是原子的，比如：创建、修改、删除等。另外，MongoDB中还提供了针对单个文档的原子操作：findAndModify，并且提供了重命名、自增等各种子操作，官方文档：[MongoDB - findAndModify()](https://docs.mongodb.com/manual/reference/method/db.collection.findAndModify/)。
+
+### 保存关联属性
+
+在MongoDB中保存关联属性和ES中保存的方式有很多相似点，当保存一个关联关系时，有以下方案可以选择：
+
+- 嵌入式关系，类似于ES中的扁平化，直接将另一个文档嵌入到当前文档中，实现一对多关系
+- 引用式关系（包含手动引用和数据库引用），用ObjectID代替嵌入内容，需要手动拉取两次才可以获得相应的文档内容
+
+
+
+### 数据文件
+
+#### BSON格式
+
+BSON格式文件其实是一种二进制JSON格式（Binary JSON）文件，它的名字本身就是英文名的缩写，不过因为要适配MongoDB，它支持的字段类型和JSON略有不同，同时效率要比JSON本身高多了，具体支持的类型可以参考官方文档：[MongoDB - BSON types](https://docs.mongodb.com/manual/reference/bson-types/)。
+
+#### 命名空间
+
+在数据保存到文件之后，文件的组织是以命名空间（Namespace）为单位进行的，在MongoDB里，每个集合或者索引都拥有自己的命名空间。命名空间通常是一个对使用者透明的抽象概念，但是在把数据保存到系统中时，它又是一个非常具体的概念。
+
+每个命名空间会被切割成好多个数据文件，被称为区段（extent），区段可以保存在不同的地方，在磁盘上不一定是连续的，但是尽量要求连续，并且最后一块区段会有一部分预分配的额外空间，整体和操作系统中的内存管理很类似，参考文档：[MongoDB权威指南 - 命名空间与区段](https://www.d5.nz/read/MongoDB2/text-part0049.html)。
 
 ## 索引
 
@@ -1064,6 +1114,8 @@ ES集群在Bully算法上做出了一点改进，从而避免了这两种问题�
 #### 文本索引
 
 ## 分布式架构
+
+### 备份工具
 
 ### 三种架构方案
 
