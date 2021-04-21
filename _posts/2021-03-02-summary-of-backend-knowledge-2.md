@@ -35,7 +35,7 @@ WSGI的全名是：[Python Web Server Gateway Interface](https://zh.wikipedia.or
 
 所以最简单的一个Web服务就是一个静态文件的服务器，即根据url直接找到文本返回就可以了，但是如果使用Python作为后端服务器，那么就会有一个动态的流程了，WSGI就是定义这种流程的一个规范，如果没有这个规范，想要实现一个HTTP服务器可能就得花个把月去了解HTTP协议的全部内容了。
 
-![django-2](../img/in-post/2021-03-01-mind-map-of-backend-knowledge/django-2.png)
+![django-2](../img/in-post/2021-03-01-summary-of-backend-knowledge/django-2.png)
 
 有了WSGI以后，想要实现一个基于Python的动态Web服务器就很简单了，参照文档编写代码就可以了，详细内容可以参考：[FullStack Python - WSGI Servers](https://www.fullstackpython.com/wsgi-servers.html)。
 
@@ -60,7 +60,7 @@ WSGI的全名是：[Python Web Server Gateway Interface](https://zh.wikipedia.or
 
 在Django系统中处理HTTP请求时，很重要的一点是它的中间层系统，它的中间层设计类似于一个针对请求的AOP，许多第三方插件都是通过中间层来实现的。最开始在Django的WSGIHandler中会将WSGI封装的environ转化成Reqeust，之后的处理流程大致如下图：
 
-![](../img/in-post/2021-03-01-mind-map-of-backend-knowledge/django-1.png)
+![](../img/in-post/2021-03-01-summary-of-backend-knowledge/django-1.png)
 
 一般常见的使用到中间件的情况有：
 
@@ -83,7 +83,7 @@ Mysql是目前最流行的关系型数据库，它最常见的数据库引擎是
 
 B树和B+树广泛应用于各类的数据库中，它们都是树形数据结构的一种，并且都属于[搜索树](https://zh.wikipedia.org/wiki/%E6%90%9C%E7%B4%A2%E6%A0%91)。
 
-![](../img/in-post/2021-03-01-mind-map-of-backend-knowledge/mysql-1.png)
+![](../img/in-post/2021-03-01-summary-of-backend-knowledge/mysql-1.png)
 
 搜索树有一个非常重要的特性：它的中序遍历是有序的，由于这个特性，如果希望寻找一个 $key$，那么可以从根开始查找，根据 $key$ 和当前节点保存值的大小关系去查找对应子树，直到找到 $key$ 或者确认它不存在，最终查找单个值的复杂度上限不会超过树的深度。
 
@@ -287,7 +287,7 @@ LPOP: 73882.52 requests per second
 
 IO多路复用这种并发模型在[操作系统](#io多路复用)和Java的[NIO](#bionio和aio)中都有涉及，在Redis中使用的IO多路复用器的基本原理都和它们类似，Redis为每个IO多路复用函数库（比如select、epoll、evport等）都实现了相同的API，程序会在编译时自动选择系统中性能最高的IO多路复用函数库来作为Redis的底层实现。
 
-![](../img/in-post/2021-03-01-mind-map-of-backend-knowledge/redis-1.png)
+![](../img/in-post/2021-03-01-summary-of-backend-knowledge/redis-1.png)
 
 #### 事件处理器
 
@@ -401,7 +401,7 @@ PS：主从和哨兵是**不能保证数据不丢失**的，它们的组合只�
 
 [Redis集群](https://redis.io/topics/cluster-tutorial)模式是官方提供的另一种高可用方案，包含了：槽指派、重新分片、动态扩缩容、故障转移等功能。
 
-![](../img/in-post/2021-03-01-mind-map-of-backend-knowledge/redis-3.png)
+![](../img/in-post/2021-03-01-summary-of-backend-knowledge/redis-3.png)
 
 **槽指派**：Redis集群将所有的key分配到16384（[为什么：与心跳包的大小有关](https://github.com/redis/redis/issues/2576)）个槽位上，然后将这些槽位分配到Redis实例上，所有的槽必须分配完毕集群才处于可用状态，任意槽没有对应的实例都会导致集群宕机
 
@@ -413,7 +413,7 @@ PS：主从和哨兵是**不能保证数据不丢失**的，它们的组合只�
 
 [一致性哈希](https://zh.wikipedia.org/wiki/%E4%B8%80%E8%87%B4%E5%93%88%E5%B8%8C)是一种环形哈希算法，它与Redis集群本身并没有太大关系，但是经常与Redis的槽分配方案进行比较。假如仅仅把Redis当作缓存使用，而不需要用到持久化，那么可以使用多个Redis实例与一致性哈希结合的方案，当机器下线时，一致性哈希可以保障系统依旧可用。
 
-![](../img/in-post/2021-03-01-mind-map-of-backend-knowledge/redis-2.png)
+![](../img/in-post/2021-03-01-summary-of-backend-knowledge/redis-2.png)
 
 另外，一致性哈希经常用在这样的场景下：需要将带有编号的客户端每次都放到同一个服务器上执行，并且还需要支持扩缩容操作。至于为什么Redis没有采用一致性哈希的方案，笔者找了半天并没有什么收获，后来看到有人提了个[issue](https://github.com/redis/redis/issues/7451)，下面最新的回答是因为槽分配实现起来简单啊，咋说呢，听着也挺合理的。
 
@@ -454,7 +454,7 @@ PS：主从和哨兵是**不能保证数据不丢失**的，它们的组合只�
 
 索引实际上是建立一个数据结构，方便通过Key查询到对应的Value。[倒排索引](https://zh.wikipedia.org/wiki/%E5%80%92%E6%8E%92%E7%B4%A2%E5%BC%95)可能在一般的数据库中不常见，但是在搜索引擎中是一种非常常见的数据结构，如果把文章ID看作Key，文章内容看作Value的话，倒排索引就是需要建立一个Value到Key的反查关系，方便通过文章的内容来查找文章的ID。
 
-![](../img/in-post/2021-03-01-mind-map-of-backend-knowledge/es-1.png)
+![](../img/in-post/2021-03-01-summary-of-backend-knowledge/es-1.png)
 
 上图是一个倒排索引的样例，这里涉及了一个非常重要的步骤：分词，在分词之后对每个词和文章ID建立一个映射关系，就形成一个倒排索引的结构了，此时需要查询包含一些关键词的文章，只要去找关键词对应的文章ID即可。
 

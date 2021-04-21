@@ -30,7 +30,7 @@ tags:
 
 [HDFS（Hadoop Distributed File System）](http://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/HdfsDesign.html)是Hadoop下的分布式文件系统，具有高容错、高吞吐量等特性，可以部署在低成本的硬件上。HDFS 遵循主/从架构，由单个 NameNode（NN） 和多个 DataNode（DN） 组成：
 
-![](../img/in-post/2021-03-01-mind-map-of-backend-knowledge/hadoop-1.png)
+![](../img/in-post/2021-03-01-summary-of-backend-knowledge/hadoop-1.png)
 
 **NameNode（NN）**：负责执行有关文件系统命名空间的操作，例如打开，关闭、重命名文件和目录等。它同时还负责集群元数据的存储，记录着文件中各个数据块的位置信息。
 
@@ -50,7 +50,7 @@ tags:
 
 [MapReduce](http://hadoop.apache.org/docs/current/hadoop-mapreduce-client/hadoop-mapreduce-client-core/MapReduceTutorial.html)是一个分布式计算框架，编写好的程序可以提交到Hadoop集群上用于并行处理大规模的数据集，这种分布式框架主要由三个基本的步骤组成：
 
-![](../img/in-post/2021-03-01-mind-map-of-backend-knowledge/hadoop-2.jpg)
+![](../img/in-post/2021-03-01-summary-of-backend-knowledge/hadoop-2.jpg)
 
 - 首先系统将输入的数据拆分成独立的块，将这些块交给编写好的Map函数进行处理
 - 之后系统会根据返回的内容进行排序，这个阶段由系统操作，被称为Shuffle（使用类MapReduce的框架基本都包含这一步骤）
@@ -62,7 +62,7 @@ MapReduce是一种专门处理Key-Value的计算框架，因此所有的Map和Re
 
 [YARN（Yet Another Resource Negotiator）](http://hadoop.apache.org/docs/current/hadoop-yarn/hadoop-yarn-site/YARN.html)是hadoop2.0引入的集群资源管理系统，用户可以将各种服务框架部署在YARN上，由YARN进行统一地管理和资源分配。YARN的诞生让Hadoop的资源管理成为一种事实上的标准，许多处理引擎都开始依赖YARN。
 
-![](../img/in-post/2021-03-01-mind-map-of-backend-knowledge/hadoop-3.png)
+![](../img/in-post/2021-03-01-summary-of-backend-knowledge/hadoop-3.png)
 
 #### Container
 
@@ -170,7 +170,7 @@ Spark非常快的一个关键原因在于它有缓存功能，缓存之后如果
 
 在MapReduce中，Shuffle的步骤是Hadoop框架将Map函数的输出整体进行排序，从而可以交给Reduce函数执行的过程。在这一过程有两个缺陷：一是要求Map函数的输出是可排序的，第二对于某些操作并不需要排序，全排序的策略会影响性能。
 
-![](../img/in-post/2021-03-01-mind-map-of-backend-knowledge/spark-1.png)
+![](../img/in-post/2021-03-01-summary-of-backend-knowledge/spark-1.png)
 
 因此在Spark中的Shuffle步骤有所不同，在Spark中通常不会进行跨分区操作，但是遇到reduceByKey等转换时，就必须从所有的分区读取数据并查找所有键对应的值，然后汇总在一起以计算每个键的最终结果，这就是Spark中的Shuffle。在Spark的版本变迁中，Shuffle也经历了多个版本的迭代，不过如果不使用排序的方式进行Shuffle的话，会用到HashMap进行去重，这样的问题是很容易导致OOM，因此最后还是选择了[优化之后的Sort Shuffle](https://zhuanlan.zhihu.com/p/67061627)。
 
@@ -219,7 +219,7 @@ for (i <- 1 to iters) {
 > num-executors —— 启动executors的数量，默认为2
 > executor-memory —— executor内存大小，默认1G
 
-![](../img/in-post/2021-03-01-mind-map-of-backend-knowledge/spark-2.png)
+![](../img/in-post/2021-03-01-summary-of-backend-knowledge/spark-2.png)
 
 可以看到配置的参数中最主要涉及两个模块：
 
