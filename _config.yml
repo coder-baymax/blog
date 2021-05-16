@@ -105,5 +105,9 @@ friends: [
     {
         title: "陈迪的Blog",
         href: "http://chendi.me/"
+    },
+    {
+        title: "田琛的学习笔记",
+        href: "https://www.yuque.com/books/share/f360428c-f0ed-4075-b662-b59ecc9a5939"
     }
 ]

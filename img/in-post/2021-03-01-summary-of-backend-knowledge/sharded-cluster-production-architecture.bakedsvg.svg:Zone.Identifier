@@ -1,0 +1,4 @@
+[ZoneTransfer]
+ZoneId=3
+ReferrerUrl=https://docs.mongodb.com/manual/sharding/
+HostUrl=https://docs.mongodb.com/manual/images/sharded-cluster-production-architecture.bakedsvg.svg
