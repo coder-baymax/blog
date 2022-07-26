@@ -540,10 +540,89 @@ PS：JDK8开始，元空间取代了永久代，所以相应的JVM参数变成-X
 
 ## 线程并发
 
-TODO
+之前已经提到过，常见的并发方式可以分为三大类：进程并发、线程并发和IO多路复用并发，其中线程并发是在Java语言中最常见的并发处理方式。线程并发在服务端用的基本模式是：当收到一个客户端请求时，新建一个线程来处理客户端的请求，并由这个线程进行返回，通常这部分工作会由框架来完成，部分框架还会用线程池来进行优化。
+
+### JVM线程
+
+对于框架中的线程工作情况，通常不需要程序员来关心，但是一旦涉及到线程相关的问题会极难解决。其根本原因是线程并不拥有独立资源，它们在JVM中有大量的共享内存区域，必须小心地处理线程之间的相互影响，防止服务产生以外情况。PS：目前已经有许多大牛不建议手动使用多线程了，如果需要多线程来最大化资源使用，应该通过构建无状态服务+多个实例的方式，从而避免多线程可能产生的众多bug。
+
+#### 线程调度
+
+在Sun公司公布的JVM系统中，包含了一个被称为Thread Scheduler的东西，直接翻译过来也就是线程调度器。不过实际上在绝大多数支持线程调度的操作系统上，JVM中的线程都会直接交给操作系统来进行调度，此时也就没有所谓的线程调度器了。在一些不支持线程的操作系统上，就需要用到[Green Threads](https://en.wikipedia.org/wiki/Green_threads)，这类线程由具体的虚拟机自己实现，因此有时并不能很好地利用多核心CPU。
+
+#### 生命周期
+
+![](../img/in-post/2021-03-01-summary-of-backend-knowledge/jvm-4.jpg)
+
+线程所包含的各个状态已经各状态之间的转化关系都在上图标明了，其中只有running这个状态下线程是正在运行的，不过对于程序员来说线程的running和ready to run状态切换是由线程调度器执行的，因此它们都可以看作是可运行状态；另外，不可运行状态包含了blocked、waiting和timed waiting状态，可运行和不可运行状态之间的切换是由程序操作来决定的，这也是在编写多线程并发代码时需要重点关注的。
 
 ### 原子对象
 
+在Java中通常所说的源自对象包含了两个概念：volatile关键字和Atomic包里的原子对象，其中volatile关键字是Atomic原子对象底层实现的一部分。
+
+#### volatile关键字
+
+JVM的内存模型和计算机中的实际内存是不同的，不过最终都会存储到实际的计算机内存中，计算机的内存一般会分为：寄存器、高速缓存和主存，其中寄存器和高速缓存一般是线程私有的，而主存由各个线程共享。因此，在多个线程争抢同一个变量时，可能会导致线程的改动对另一个线程不可见，具体可以参考博客：[Java Memory Model](http://tutorials.jenkov.com/java-concurrency/java-memory-model.html)。
+
+![](../img/in-post/2021-03-01-summary-of-backend-knowledge/jvm-5.png)
+
+本质上来说，volatile关键字保证了线程的可见性和有序性，即一个被标记成volatile的变量，对它的修改会立刻同步到主存中去，并且对其进行读取时，也会立刻从主存中刷新，防止出现主存和缓存中数据不一致的情况；另外，在操作volatile变量时会加入内存屏障，从而禁止指令重排序。
+
+#### Atomic对象
+
+前面说到所有的Atomic对象是基于volatile实现的，另外还使用了Java提供的Unsafe对象来进行CAS操作，下面是一段AtomicInteger的源码：
+
+```python
+public class AtomicInteger extends Number implements java.io.Serializable {
+    private static final long serialVersionUID = 6214790243416807050L;
+
+    // setup to use Unsafe.compareAndSwapInt for updates
+    private static final Unsafe unsafe = Unsafe.getUnsafe();
+    private static final long valueOffset;
+
+    static {
+        try {
+            valueOffset = unsafe.objectFieldOffset
+                (AtomicInteger.class.getDeclaredField("value"));
+        } catch (Exception ex) { throw new Error(ex); }
+    }
+
+    private volatile int value;
+    
+    public final int addAndGet(int delta) {
+        return unsafe.getAndAddInt(this, valueOffset, delta) + delta;
+    }
+
+    public final int getAndAdd(int delta) {
+        return unsafe.getAndAddInt(this, valueOffset, delta);
+    }
+
+    public final int getAndAddInt(Object o, long offset, int delta) {
+        int v;
+        do {
+            v = getIntVolatile(o, offset);
+        } while (!compareAndSwapInt(o, offset, v, v + delta));
+        return v;
+    }
+}
+```
+
+可以看到核心部分的代码就是通过一个volatile关键字修饰的整型和一个CAS循环来实现的，这种方式相比锁实现在线程竞争少的时候有更高的效率，但是在线程竞争激烈的情况下可能会有一定的性能问题。
+
 ### 锁相关
 
+锁是一个非常大的主题，只要存在并发与并行的地方，就有锁的影子，比如：数据库、多线程、多实例等等。在最原始锁的基础之上，根据不同维度又抽象出了非常多不同的锁：
+
+- 每次获取资源是否上锁：悲观锁和乐观锁
+- 是否阻塞当前运行程序：阻塞锁和非阻塞锁（自旋锁和适应性自旋锁）
+- 锁的量级：无锁、偏向锁、轻量级锁和重量级锁
+- 获得锁的顺序：公平锁和分公平锁
+- 当前运行程序是否可以多次拿锁：可重入锁和不可重入锁
+- 锁能否被共享：共享锁和排他锁
+
+美团有博客对于上述所有的锁都做出了具体的比较和描述：[美团 - 不可不说的Java“锁”事](https://tech.meituan.com/2018/11/15/java-lock.html)。
+
+
+
 ### 线程池
+
