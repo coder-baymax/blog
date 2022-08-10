@@ -2,7 +2,7 @@
 layout:     post
 title:      "Use SR-IOV Network Interfance in Unraid"
 subtitle:   "在unraid中打开并使用网卡的SR-IOV功能"
-date:       2021-07-30 12:00:00
+date:       2022-07-30 12:00:00
 author:     "Baymax"
 header-img: "img/post-bg-agt-8.jpg"
 catalog: true
